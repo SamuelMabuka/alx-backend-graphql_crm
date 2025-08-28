@@ -1,4 +1,3 @@
-# crm/tasks.py
 from celery import shared_task
 from datetime import datetime
 from gql import gql, Client
@@ -17,20 +16,14 @@ def generate_crm_report():
 
         query = gql("""
         {
-        totalCustomers: allCustomers {
-            id
-        }
-        totalOrders: allOrders {
-            id
-            totalAmount
-        }
+        allCustomers { id }
+        allOrders { id totalAmount }
         }
         """)
-
         result = client.execute(query)
-        num_customers = len(result['totalCustomers'])
-        num_orders = len(result['totalOrders'])
-        total_revenue = sum(order['totalAmount'] for order in result['totalOrders'])
+        num_customers = len(result['allCustomers'])
+        num_orders = len(result['allOrders'])
+        total_revenue = sum(order['totalAmount'] for order in result['allOrders'])
 
         log_msg = f"{timestamp} - Report: {num_customers} customers, {num_orders} orders, {total_revenue} revenue"
     except Exception as e:
