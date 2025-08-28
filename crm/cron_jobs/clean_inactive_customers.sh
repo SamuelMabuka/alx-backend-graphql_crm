@@ -1,24 +1,26 @@
 #!/bin/bash
-# crm/cron_jobs/clean_inactive_customers.sh
 
-# Absolute paths
-PROJECT_DIR="/home/re_birth/alx-backend-graphql_crm"
-PYTHON_BIN="$PROJECT_DIR/graph_env/bin/python"
-MANAGE="$PROJECT_DIR/manage.py"
+# Navigate to project root
+cd /home/re_birth/alx-backend-graphql_crm/
 
-# Run Django shell command to delete inactive customers
-DELETED=$($PYTHON_BIN $MANAGE shell -c "
-from datetime import timedelta
-from django.utils import timezone
+# Activate virtual environment
+source graph_env/bin/activate
+
+# Run Django shell to delete inactive customers
+DELETED=$(python manage.py shell -c '
 from crm.models import Customer
+from django.utils import timezone
+from datetime import timedelta
 
-cutoff = timezone.now() - timedelta(days=365)
-qs = Customer.objects.filter(order__isnull=True, created_at__lt=cutoff)
-count = qs.count()
-qs.delete()
+one_year_ago = timezone.now() - timedelta(days=365)
+
+# Customers with no orders in the last year
+inactive = Customer.objects.filter(orders__order_date__lt=one_year_ago) | Customer.objects.filter(orders__isnull=True)
+count = inactive.count()
+inactive.delete()
 print(count)
-")
+')
 
-# Log results with timestamp
+# Log the number of deleted customers with timestamp
 echo "$(date): Deleted $DELETED inactive customers" >> /tmp/customer_cleanup_log.txt
 
