@@ -1,9 +1,8 @@
-# alx_backend_graphql_crm/urls.py
 from django.contrib import admin
 from django.urls import path
 from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
-import schema  # ✅ import from root, not from alx_backend_graphql_crm.schema
+from . import schema  # ✅ relative import from same folder
 
 urlpatterns = [
     path("admin/", admin.site.urls),
